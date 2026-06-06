@@ -1,0 +1,12 @@
+import { useState } from 'react';
+import api from '../api/client';
+import { Alert, getError, PageHeader } from '../components/Ui';
+
+const today = new Date().toISOString().slice(0, 10);
+export default function SubmitReport() {
+  const [form, setForm] = useState({ report_date: today, tasks_completed: '', hours_worked: '8', blockers: '', next_day_plan: '' });
+  const [state, setState] = useState({ error: '', success: '', loading: false });
+  const set = (key) => (e) => setForm({...form, [key]:e.target.value});
+  const submit = async (e) => { e.preventDefault(); setState({error:'',success:'',loading:true}); try { await api.post('/reports', form); setState({error:'',success:'Your daily report was submitted.',loading:false}); setForm({...form,tasks_completed:'',blockers:'',next_day_plan:''}); } catch(err) { setState({error:getError(err),success:'',loading:false}); } };
+  return <><PageHeader title="Submit daily report" subtitle="Capture your progress, blockers, and plan for tomorrow."/><div className="card form-card"><form onSubmit={submit}><Alert {...state}/><div className="row g-3"><div className="col-md-6"><label className="form-label">Report date</label><input type="date" max={today} className="form-control" required value={form.report_date} onChange={set('report_date')}/></div><div className="col-md-6"><label className="form-label">Hours worked</label><input type="number" min="0" max="24" step="0.25" className="form-control" required value={form.hours_worked} onChange={set('hours_worked')}/></div><div className="col-12"><label className="form-label">Tasks completed</label><textarea className="form-control" rows="5" required minLength="5" value={form.tasks_completed} onChange={set('tasks_completed')} placeholder="Describe completed work and outcomes..."/></div><div className="col-md-6"><label className="form-label">Blockers</label><textarea className="form-control" rows="4" value={form.blockers} onChange={set('blockers')} placeholder="Anything blocking progress?"/></div><div className="col-md-6"><label className="form-label">Next day plan</label><textarea className="form-control" rows="4" value={form.next_day_plan} onChange={set('next_day_plan')} placeholder="What will you focus on next?"/></div></div><div className="text-end mt-4"><button className="btn btn-primary px-4" disabled={state.loading}>{state.loading ? 'Submitting...' : 'Submit report'}</button></div></form></div></>;
+}

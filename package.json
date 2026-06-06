@@ -1,0 +1,13 @@
+{
+  "name": "employee-daily-reporting-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix backend ci && npm --prefix frontend ci",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run check && npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "seed:admin": "npm --prefix backend run seed:admin"
+  }
+}
