@@ -61,14 +61,30 @@ app.use('/api/auth', authLimiter);
 // Swagger Documentation Route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Health Check Route
-app.get('/health', (req, res) => {
+// Root Route for Render Deployment & Web Health Checks
+app.get('/', (req, res) => {
   res.status(200).json({
-    status: 'success',
-    message: 'Employee Daily Reporting System API is running',
+    success: true,
+    service: 'ReportPulse Backend',
+    status: 'Running',
+    environment: process.env.NODE_ENV === 'production' ? 'Production' : 'Development',
     timestamp: new Date().toISOString(),
   });
 });
+
+// Health Check Routes
+const healthHandler = (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'success',
+    service: 'ReportPulse Backend',
+    message: 'Employee Daily Reporting System API is running',
+    timestamp: new Date().toISOString(),
+  });
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // API Routes
 app.use('/api/auth', authRoutes);
