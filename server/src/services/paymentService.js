@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import crypto from 'crypto';
 import razorpayInstance from '../config/razorpay.js';
 import Payment from '../models/Payment.js';
@@ -146,14 +147,24 @@ export const getUserPaymentHistory = async (userId, queryString) => {
   };
 };
 
-export const getInvoiceById = async (userId, paymentId) => {
-  const payment = await Payment.findOne({ _id: paymentId, user: userId }).populate(
+export const getInvoiceById = async (userOrId, identifier) => {
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+
+  const searchConditions = [];
+  if (isObjectId) {
+    searchConditions.push({ _id: identifier });
+  }
+  searchConditions.push({ invoiceNumber: identifier });
+  searchConditions.push({ paymentId: identifier });
+  searchConditions.push({ orderId: identifier });
+
+  const payment = await Payment.findOne({ $or: searchConditions }).populate(
     'user',
     'name email employeeId department designation phone'
   );
 
   if (!payment) {
-    throw new ApiError(404, 'Invoice record not found');
+    throw new ApiError(404, `Invoice details not found for identifier "${identifier}"`);
   }
 
   return payment;

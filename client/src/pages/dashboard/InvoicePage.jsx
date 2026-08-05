@@ -19,7 +19,7 @@ const InvoicePage = () => {
         const res = await getInvoiceApi(id);
         setInvoice(res.data);
       } catch (error) {
-        toast.error('Failed to load invoice details');
+        toast.error(error.response?.data?.message || 'Failed to load invoice details');
       } finally {
         setLoading(false);
       }
