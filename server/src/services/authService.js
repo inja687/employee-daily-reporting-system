@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Company from '../models/Company.js';
 import ApiError from '../utils/ApiError.js';
 import ApiFeatures from '../utils/apiFeatures.js';
 import {
@@ -16,29 +17,49 @@ export const registerUser = async (userData, creatorUser = null) => {
     throw new ApiError(400, 'User with this email already exists');
   }
 
-  const tenantId = creatorUser?.tenantId || userData.tenantId;
-  const companyId = creatorUser?.companyId?._id || creatorUser?.companyId || userData.companyId || null;
+  let tenantId = creatorUser?.tenantId || userData.tenantId;
+  let companyId = creatorUser?.companyId?._id || creatorUser?.companyId || userData.companyId || null;
 
-  if (!tenantId && role !== 'Super Admin') {
-    throw new ApiError(400, 'Tenant ID is required to register an employee');
+  // Resolve tenantId & companyId from companyCode/companyId if missing
+  if (!tenantId && (userData.companyCode || userData.companyId)) {
+    const comp = await Company.findOne({
+      $or: [
+        { companyCode: (userData.companyCode || '').toUpperCase() },
+        { companyId: userData.companyId },
+      ].filter(Boolean),
+    });
+    if (comp) {
+      tenantId = comp.tenantId;
+      companyId = comp._id;
+    }
   }
 
-  // Check duplicate employeeId scoped to tenant
-  if (employeeId) {
-    const existingEmployeeId = await User.findOne({
-      tenantId,
-      employeeId: employeeId.toUpperCase(),
-    });
-    if (existingEmployeeId) {
-      throw new ApiError(400, 'An employee with this Employee ID already exists in your workspace');
+  // Fallback to latest registered company workspace or default system tenant if missing
+  if (!tenantId) {
+    const defaultComp = await Company.findOne().sort({ createdAt: -1 });
+    if (defaultComp) {
+      tenantId = defaultComp.tenantId;
+      companyId = defaultComp._id;
+    } else {
+      tenantId = 'default-system-tenant';
     }
+  }
+
+  // Generate or sanitize employeeId and check duplicate scoped to tenant
+  const finalEmpId = employeeId ? employeeId.toUpperCase() : `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
+  const existingEmployeeId = await User.findOne({
+    tenantId,
+    employeeId: finalEmpId,
+  });
+  if (existingEmployeeId) {
+    throw new ApiError(400, 'An employee with this Employee ID already exists in your workspace');
   }
 
   const user = await User.create({
     name,
     email,
     password,
-    employeeId: employeeId ? employeeId.toUpperCase() : undefined,
+    employeeId: finalEmpId,
     tenantId,
     companyId,
     department,

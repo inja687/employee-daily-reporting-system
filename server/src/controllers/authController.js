@@ -2,6 +2,9 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import * as authService from '../services/authService.js';
 
+import User from '../models/User.js';
+import { verifyAccessToken } from '../utils/jwt.js';
+
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
 const cookieOptions = {
@@ -12,7 +15,19 @@ const cookieOptions = {
 };
 
 export const register = asyncHandler(async (req, res) => {
-  const { user, accessToken, refreshToken } = await authService.registerUser(req.body, req.user);
+  let creatorUser = req.user;
+
+  if (!creatorUser && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = verifyAccessToken(token);
+      creatorUser = await User.findById(decoded._id);
+    } catch (e) {
+      // Ignored if invalid token
+    }
+  }
+
+  const { user, accessToken, refreshToken } = await authService.registerUser(req.body, creatorUser);
 
   res
     .status(201)
