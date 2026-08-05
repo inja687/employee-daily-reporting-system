@@ -13,8 +13,8 @@ const subscriptionSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ['Free Trial', 'Starter', 'Professional', 'Enterprise'],
       default: 'Free Trial',
+      trim: true,
     },
     status: {
       type: String,

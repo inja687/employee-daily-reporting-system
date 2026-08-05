@@ -29,8 +29,8 @@ const paymentSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ['Starter', 'Professional', 'Enterprise'],
       required: [true, 'Plan name is required'],
+      trim: true,
     },
     paymentMethod: {
       type: String,
