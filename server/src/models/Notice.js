@@ -5,7 +5,6 @@ const noticeSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -48,7 +47,7 @@ const noticeSchema = new mongoose.Schema(
   }
 );
 
-noticeSchema.index({ tenantId: 1 });
+noticeSchema.index({ tenantId: 1, isPinned: -1 });
 
 const Notice = mongoose.model('Notice', noticeSchema);
 

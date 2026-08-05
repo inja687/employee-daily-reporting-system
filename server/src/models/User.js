@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       default: 'default-system-tenant',
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -80,6 +79,8 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.index({ tenantId: 1, role: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

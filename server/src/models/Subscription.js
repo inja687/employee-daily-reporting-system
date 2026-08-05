@@ -10,7 +10,6 @@ const subscriptionSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Tenant ID (UUID) is required'],
       unique: true,
-      index: true,
     },
     plan: {
       type: String,

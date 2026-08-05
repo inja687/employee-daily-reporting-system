@@ -10,7 +10,6 @@ const attendanceSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -58,8 +57,9 @@ const attendanceSchema = new mongoose.Schema(
   }
 );
 
-// Ensure one attendance entry per user per day per tenant
+// Compound unique index per tenant, user, date
 attendanceSchema.index({ tenantId: 1, user: 1, date: 1 }, { unique: true });
+attendanceSchema.index({ tenantId: 1, status: 1 });
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 

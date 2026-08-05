@@ -10,7 +10,6 @@ const leaveSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -62,6 +61,7 @@ const leaveSchema = new mongoose.Schema(
 );
 
 leaveSchema.index({ tenantId: 1, user: 1 });
+leaveSchema.index({ tenantId: 1, status: 1 });
 
 const Leave = mongoose.model('Leave', leaveSchema);
 

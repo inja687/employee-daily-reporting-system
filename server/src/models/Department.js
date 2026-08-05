@@ -5,7 +5,6 @@ const departmentSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -28,7 +28,6 @@ const dailyReportSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -76,8 +75,9 @@ const dailyReportSchema = new mongoose.Schema(
   }
 );
 
-// Index to prevent duplicate report for the same user on the same date within tenant
+// Compound index to optimize report lookups per tenant, user, date
 dailyReportSchema.index({ tenantId: 1, user: 1, date: 1 });
+dailyReportSchema.index({ tenantId: 1, status: 1 });
 
 const DailyReport = mongoose.model('DailyReport', dailyReportSchema);
 

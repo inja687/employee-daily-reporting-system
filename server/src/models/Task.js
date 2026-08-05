@@ -5,7 +5,6 @@ const taskSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       required: [true, 'Tenant ID is required for multi-tenant isolation'],
-      index: true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -53,6 +52,7 @@ const taskSchema = new mongoose.Schema(
 );
 
 taskSchema.index({ tenantId: 1, assignedTo: 1 });
+taskSchema.index({ tenantId: 1, status: 1 });
 
 const Task = mongoose.model('Task', taskSchema);
 

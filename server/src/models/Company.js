@@ -14,7 +14,6 @@ const companySchema = new mongoose.Schema(
       required: [true, 'Company Code is required'],
       trim: true,
       uppercase: true,
-      index: true,
     },
     tenantId: {
       type: String,

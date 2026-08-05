@@ -112,7 +112,6 @@ const supportTicketSchema = new mongoose.Schema(
     tenantId: {
       type: String,
       default: null,
-      index: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -134,6 +133,8 @@ const supportTicketSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+supportTicketSchema.index({ tenantId: 1, status: 1 });
 
 const SupportTicket = mongoose.model('SupportTicket', supportTicketSchema);
 
