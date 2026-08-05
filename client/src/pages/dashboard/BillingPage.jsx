@@ -267,7 +267,9 @@ const BillingPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {activePlans.map((p) => {
             const isCurrentActive = isActivePaid && sub?.plan === p.name;
-            const price = annual ? p.priceAnnual : p.priceMonthly;
+            const monthlyVal = p.monthlyPrice ?? p.priceMonthly ?? 0;
+            const yearlyVal = p.yearlyPrice ?? p.priceAnnual ?? monthlyVal;
+            const price = annual ? yearlyVal : monthlyVal;
 
             return (
               <Card

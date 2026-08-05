@@ -70,12 +70,24 @@ export const getTenantSubscriptionStatus = async (tenantId, companyId) => {
 
 // 3. Create Razorpay order for plan upgrade or renewal
 export const createSubscriptionRazorpayOrder = async (userId, tenantId, companyId, { planName, billingCycle = 'monthly' }) => {
-  const plan = await Plan.findOne({ name: planName, isActive: true });
+  const cleanPlanName = planName ? planName.replace(/ Plan$/i, '') : '';
+  const plan = await SubscriptionPlan.findOne({
+    $or: [
+      { name: new RegExp(`^${planName}$`, 'i') },
+      { name: new RegExp(`^${cleanPlanName}$`, 'i') },
+      { name: new RegExp(`^${cleanPlanName} Plan$`, 'i') },
+      { slug: planName.toLowerCase().replace(/\s+/g, '-') },
+    ],
+    status: 'Active',
+  });
+
   if (!plan) {
     throw new ApiError(404, `Selected subscription plan "${planName}" not found in database`);
   }
 
-  const amount = billingCycle === 'annual' || billingCycle === 'yearly' ? plan.priceAnnual : plan.priceMonthly;
+  const amount = (billingCycle === 'annual' || billingCycle === 'yearly')
+    ? (plan.yearlyPrice ?? plan.priceAnnual ?? 0)
+    : (plan.monthlyPrice ?? plan.priceMonthly ?? 0);
   const amountInPaise = Math.round(amount * 100);
 
   const options = {
